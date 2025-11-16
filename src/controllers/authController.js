@@ -13,12 +13,14 @@ const setRefreshCookie = (res, token, expiresAt) => {
 
 const register = async (req, res, next) => {
   try {
-    const { first_name, last_name, email, password } = req.body;
+    const { first_name, last_name, email, password, role, phone } = req.body;
     const user = await authService.registerUser({
       first_name,
       last_name,
       email,
       password,
+      role,
+      phone,
     });
     res.status(201).json({ user });
   } catch (err) {
@@ -29,11 +31,16 @@ const register = async (req, res, next) => {
 const login = async (req, res, next) => {
   try {
     const { email, password } = req.body;
+
     const user = await authService.loginUser({ email, password });
 
     const { accessToken, refreshToken, refreshExpiresAt } =
       await authService.createTokensForUser(
-        { id: user.id, email: user.email },
+        {
+          id: user.id,
+          email: user.email,
+          role: user.role,
+        },
         { ipAddress: req.ip, userAgent: req.get("User-Agent") }
       );
 
@@ -48,4 +55,5 @@ const login = async (req, res, next) => {
     next(err);
   }
 };
-module.exports = { register ,login};
+
+module.exports = { register, login };

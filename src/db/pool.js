@@ -7,7 +7,6 @@ let pool;
 if (config.databaseUrl && typeof config.databaseUrl === "string") {
   pool = new Pool({ connectionString: config.databaseUrl });
 } else {
-  // fallback: use DB_* env vars if you set them instead of DATABASE_URL
   pool = new Pool({
     user: process.env.DB_USER,
     password: process.env.DB_PASSWORD,

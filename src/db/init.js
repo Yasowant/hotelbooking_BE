@@ -6,6 +6,7 @@ const db = require("./pool");
 const createTables = async () => {
   try {
     const filePath = path.join(__dirname, "../../sql/create_tables.sql");
+    console.log("📄 SQL File Path:", filePath);
 
     const sql = fs.readFileSync(filePath, "utf8");
 

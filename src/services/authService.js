@@ -1,4 +1,3 @@
-// src/services/authService.js
 const jwt = require("jsonwebtoken");
 const bcrypt = require("bcrypt");
 const crypto = require("crypto");
@@ -43,27 +42,6 @@ const hashToken = (token) =>
 
 /* register omitted here — keep your existing one */
 
-const loginUser = async ({ email, password }) => {
-  const user = await userModel.findUserByEmail(email);
-  if (!user) {
-    const err = new Error("Invalid credentials");
-    err.status = 401;
-    throw err;
-  }
-  const ok = await bcrypt.compare(password, user.password_hash);
-  if (!ok) {
-    const err = new Error("Invalid credentials");
-    err.status = 401;
-    throw err;
-  }
-  return {
-    id: user.id,
-    email: user.email,
-    first_name: user.first_name,
-    last_name: user.last_name,
-  };
-};
-
 /**
  * Creates access & refresh tokens for a user and persists hashed refresh token.
  * Returns { accessToken, refreshToken, refreshExpiresAt }
@@ -99,20 +77,59 @@ const verifyAccessToken = (token) => jwt.verify(token, config.jwt.accessSecret);
 const verifyRefreshToken = (token) =>
   jwt.verify(token, config.jwt.refreshSecret);
 
-const registerUser = async ({ first_name, last_name, email, password }) => {
+const loginUser = async ({ email, password }) => {
+  const user = await userModel.findUserByEmail(email);
+  if (!user) {
+    const err = new Error("Invalid credentials");
+    err.status = 401;
+    throw err;
+  }
+
+  const ok = await bcrypt.compare(password, user.password_hash);
+  if (!ok) {
+    const err = new Error("Invalid credentials");
+    err.status = 401;
+    throw err;
+  }
+
+  // return full user object
+  return {
+    id: user.id,
+    email: user.email,
+    first_name: user.first_name,
+    last_name: user.last_name,
+    role: user.role,
+    phone: user.phone,
+  };
+};
+
+// ---------------------- REGISTER ------------------------
+const registerUser = async ({
+  first_name,
+  last_name,
+  email,
+  password,
+  role,
+  phone,
+}) => {
   const existing = await userModel.findUserByEmail(email);
   if (existing) {
     const err = new Error("Email already in use");
     err.status = 400;
     throw err;
   }
+
   const password_hash = await bcrypt.hash(password, config.bcryptRounds);
+
   const user = await userModel.createUser({
     email,
     password_hash,
     first_name,
     last_name,
+    role,
+    phone,
   });
+
   return user;
 };
 
