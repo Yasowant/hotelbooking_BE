@@ -56,6 +56,7 @@ CREATE TABLE IF NOT EXISTS hotels (
   name TEXT NOT NULL,
   description TEXT,
   city TEXT NOT NULL,
+  address TEXT NOT NULL,
   star_rating INTEGER DEFAULT 3 CHECK (star_rating BETWEEN 1 AND 5),
   created_at TIMESTAMP WITH TIME ZONE DEFAULT now()
 );

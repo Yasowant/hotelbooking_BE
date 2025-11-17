@@ -1,4 +1,3 @@
-// src/models/userModel.js
 const db = require("../db/pool");
 
 async function createUser({
@@ -37,8 +36,44 @@ async function findUserById(id) {
   return rows[0];
 }
 
+async function getAllUsers() {
+  const q = `SELECT * FROM users ORDER BY created_at DESC`;
+  const { rows } = await db.query(q);
+  return rows;
+}
+
+async function updateUser(id, data) {
+  const fields = Object.keys(data)
+    .map((key, index) => `${key} = $${index + 1}`)
+    .join(", ");
+
+  const values = Object.values(data);
+
+  const q = `
+    UPDATE users
+    SET ${fields}
+    WHERE id = $${values.length + 1}
+    RETURNING id, email, first_name, last_name, role, phone, created_at;
+  `;
+
+  const { rows } = await db.query(q, [...values, id]);
+  return rows[0];
+}
+
+async function deleteUser(id) {
+  await db.query(
+    `
+    DELETE FROM users WHERE id=$1`,
+    [id]
+  );
+  return true;
+}
+
 module.exports = {
   createUser,
   findUserByEmail,
   findUserById,
+  getAllUsers,
+  updateUser,
+  deleteUser
 };

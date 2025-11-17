@@ -56,4 +56,47 @@ const login = async (req, res, next) => {
   }
 };
 
-module.exports = { register, login };
+const getAllUsers = async (req, res, next) => {
+  try {
+    const users = await authService.getAllUsers();
+    res.json({ users });
+  } catch (err) {
+    next(err);
+  }
+};
+
+const getUser = async (req, res, next) => {
+  try {
+    const user = await authService.getUserById(req.params.id);
+    res.json({ user });
+  } catch (err) {
+    next(err);
+  }
+};
+
+const updateUser = async (req, res, next) => {
+  try {
+    const updated = await userService.authService(req.params.id, req.body);
+    res.json({ user: updated });
+  } catch (err) {
+    next(err);
+  }
+};
+
+const deleteUser = async (req, res, next) => {
+  try {
+    await authService.deleteUser(req.params.id);
+    res.json({ message: "User deleted successfully" });
+  } catch (err) {
+    next(err);
+  }
+};
+
+module.exports = {
+  register,
+  login,
+  getAllUsers,
+  getUser,
+  updateUser,
+  deleteUser,
+};

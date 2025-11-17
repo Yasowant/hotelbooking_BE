@@ -42,26 +42,31 @@ const hashToken = (token) =>
 
 /* register omitted here — keep your existing one */
 
-/**
- * Creates access & refresh tokens for a user and persists hashed refresh token.
- * Returns { accessToken, refreshToken, refreshExpiresAt }
- */
 const createTokensForUser = async (
   user,
   { ipAddress = null, userAgent = null } = {}
 ) => {
-  const accessPayload = { sub: user.id, email: user.email };
+  const accessPayload = {
+    sub: user.id,
+    email: user.email,
+    role: user.role, // IMPORTANT FIX
+  };
+
   const accessToken = signAccessToken(accessPayload);
 
   const refreshId = uuidv4();
-  const refreshPayload = { sub: user.id, rid: refreshId };
+  const refreshPayload = {
+    sub: user.id,
+    rid: refreshId,
+    role: user.role,
+  };
+
   const refreshToken = signRefreshToken(refreshPayload);
 
   const refreshExpiresAt = new Date(
     Date.now() + parseDurationToMs(config.jwt.refreshExpiresIn)
   );
 
-  // persist hashed refresh token
   await tokenModel.saveRefreshToken({
     user_id: user.id,
     token_hash: hashToken(refreshToken),
@@ -133,6 +138,45 @@ const registerUser = async ({
   return user;
 };
 
+const getAllUsers = async () => {
+  return await userModel.getAllUsers();
+};
+
+const getUserById = async (id) => {
+  const user = await userModel.findUserById(id);
+  if (!user) {
+    const err = new Error("User Not Found");
+    err.status = 404;
+    throw err;
+  }
+  return user;
+};
+
+// UPDATE USER
+const updateUser = async (id, data) => {
+  const existing = await userModel.findUserById(id);
+  if (!existing) {
+    const err = new Error("User not found");
+    err.status = 404;
+    throw err;
+  }
+
+  return await userModel.updateUser(id, data);
+};
+
+// DELETE USER
+const deleteUser = async (id) => {
+  const existing = await userModel.findUserById(id);
+  if (!existing) {
+    const err = new Error("User not found");
+    err.status = 404;
+    throw err;
+  }
+
+  await userModel.deleteUser(id);
+  return true;
+};
+
 module.exports = {
   registerUser,
   loginUser,
@@ -140,4 +184,8 @@ module.exports = {
   verifyAccessToken,
   verifyRefreshToken,
   hashToken,
+  getAllUsers,
+  getUserById,
+  updateUser,
+  deleteUser
 };
