@@ -19,7 +19,6 @@ CREATE TABLE IF NOT EXISTS users (
 
 CREATE INDEX IF NOT EXISTS idx_users_email ON users(email);
 
--- Restrict allowed roles
 DO $$
 BEGIN
   IF NOT EXISTS (
@@ -77,5 +76,19 @@ CREATE TABLE IF NOT EXISTS rooms (
 );
 
 CREATE INDEX IF NOT EXISTS idx_rooms_hotel_id ON rooms(hotel_id);
+
+------------------------------------------------
+-- HOTEL IMAGES (Fixed)
+------------------------------------------------
+CREATE TABLE IF NOT EXISTS hotel_images (
+  id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+  hotel_id UUID REFERENCES hotels(id) ON DELETE CASCADE,
+  image_url TEXT NOT NULL,
+  public_id TEXT,  -- <<< REQUIRED for Cloudinary delete
+  is_cover BOOLEAN DEFAULT FALSE,
+  created_at TIMESTAMP WITH TIME ZONE DEFAULT now()
+);
+
+CREATE INDEX IF NOT EXISTS idx_hotel_images_hotel ON hotel_images(hotel_id);
 
 COMMIT;

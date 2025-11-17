@@ -7,6 +7,7 @@ const createTables = require("./db/init");
 const authRoutes = require("./routes/authRoutes");
 const hotelRoutes = require("./routes/hotelRoutes");
 const roomRoutes = require("./routes/roomRoutes");
+const hotelImageRoutes = require("./routes/hotelImageRoutes");
 
 const app = express();
 
@@ -19,6 +20,7 @@ app.use(express.urlencoded({ extended: true }));
 app.use("/api/auth", authRoutes);
 app.use("/api/hotel", hotelRoutes);
 app.use("/api/room", roomRoutes);
+app.use("/api/hotel-images", hotelImageRoutes);
 
 // Start server
 const port = config.port;
