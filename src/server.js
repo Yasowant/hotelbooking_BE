@@ -4,8 +4,8 @@ const config = require("./config");
 const cookieParser = require("cookie-parser");
 const db = require("./db/pool");
 const createTables = require("./db/init");
-
 const authRoutes = require("./routes/authRoutes");
+const hotelRoutes = require("./routes/hotelRoutes");
 
 const app = express();
 
@@ -16,6 +16,7 @@ app.use(express.urlencoded({ extended: true }));
 
 // Routes
 app.use("/api/auth", authRoutes);
+app.use("/api/hotel", hotelRoutes);
 
 // Start server
 const port = config.port;
