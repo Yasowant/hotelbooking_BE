@@ -1,7 +1,8 @@
-// src/server.js
 const express = require("express");
 const config = require("./config");
 const cookieParser = require("cookie-parser");
+const cors = require("cors");
+
 const db = require("./db/pool");
 const createTables = require("./db/init");
 const authRoutes = require("./routes/authRoutes");
@@ -10,6 +11,15 @@ const roomRoutes = require("./routes/roomRoutes");
 const hotelImageRoutes = require("./routes/hotelImageRoutes");
 
 const app = express();
+
+// ✅ Enable CORS for client
+app.use(
+  cors({
+    origin: config.clientUrl,
+    methods: ["GET", "POST", "PUT", "DELETE"],
+    credentials: true, // allow cookies
+  })
+);
 
 // Middlewares
 app.use(express.json());
@@ -29,14 +39,12 @@ app.listen(port, async () => {
   console.log(`🚀 Server running on port ${port}`);
 
   try {
-    // Test a simple DB query (safe + ensures connection works)
     await db.query("SELECT NOW()");
     console.log("📦 PostgreSQL Connected Successfully!");
 
-    // Create tables
     await createTables();
   } catch (error) {
     console.error("❌ Error during startup:", error.message);
-    process.exit(1); // stop server on fatal error
+    process.exit(1);
   }
 });
