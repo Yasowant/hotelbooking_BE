@@ -177,6 +177,21 @@ const deleteUser = async (id) => {
   return true;
 };
 
+const logoutUser = async (refreshToken) => {
+  if (!refreshToken) {
+    return false;
+  }
+
+  const tokenHash=hashToken(refreshToken);
+  const tokenRecord=await tokenModel.findByTokenHash(tokenHash);
+
+  if(!tokenRecord){
+    return false;
+  }
+  await tokenModel.revokeById(tokenRecord.id);
+  return true;
+};
+
 module.exports = {
   registerUser,
   loginUser,
@@ -187,5 +202,6 @@ module.exports = {
   getAllUsers,
   getUserById,
   updateUser,
-  deleteUser
+  deleteUser,
+  logoutUser
 };

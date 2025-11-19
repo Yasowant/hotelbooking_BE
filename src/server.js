@@ -2,7 +2,6 @@ const express = require("express");
 const config = require("./config");
 const cookieParser = require("cookie-parser");
 const cors = require("cors");
-
 const db = require("./db/pool");
 const createTables = require("./db/init");
 const authRoutes = require("./routes/authRoutes");

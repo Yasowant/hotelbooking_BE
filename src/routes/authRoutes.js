@@ -29,8 +29,9 @@ router.post(
 );
 
 router.get("/", auth, role("admin"), authController.getAllUsers);
-router.get("/:id",auth,authController.getUser);
-router.put("/:id",auth,role("admin"),authController.updateUser);
-router.delete("/:id",auth,role("admin"),authController.deleteUser);
+router.get("/:id", auth, authController.getUser);
+router.put("/:id", auth, role("admin"), authController.updateUser);
+router.delete("/:id", auth, role("admin"), authController.deleteUser);
+router.post("/logout", authController.logout);
 
 module.exports = router;

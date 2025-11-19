@@ -11,6 +11,15 @@ const setRefreshCookie = (res, token, expiresAt) => {
   });
 };
 
+const clearRefreshCookie = (res) => {
+  res.clearCookie("refreshToken", {
+    httpOnly: true,
+    secure: config.cookieSecure,
+    sameSite: "lax",
+    path: "/api/auth/refresh",
+  });
+};
+
 const register = async (req, res, next) => {
   try {
     const { first_name, last_name, email, password, role, phone } = req.body;
@@ -92,6 +101,27 @@ const deleteUser = async (req, res, next) => {
   }
 };
 
+const logout = async (req, res, next) => {
+  try {
+    // Try cookie first, then fallback to body.token
+    const refreshToken =
+      req.cookies && req.cookies.refreshToken
+        ? req.cookies.refreshToken
+        : req.body.refreshToken;
+
+    // Revoke in DB (if present)
+    await authService.logoutUser(refreshToken);
+
+    // Clear cookie on response (so client loses the cookie)
+    clearRefreshCookie(res);
+
+    // Optionally instruct client to remove access token from client-side storage
+    res.json({ message: "Logged out successfully" });
+  } catch (err) {
+    next(err);
+  }
+};
+
 module.exports = {
   register,
   login,
@@ -99,4 +129,5 @@ module.exports = {
   getUser,
   updateUser,
   deleteUser,
+  logout
 };
