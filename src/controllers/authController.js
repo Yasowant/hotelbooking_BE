@@ -1,12 +1,13 @@
 const authService = require("../services/authService");
 const config = require("../config");
 
+// controllers/authController.js
 const setRefreshCookie = (res, token, expiresAt) => {
   res.cookie("refreshToken", token, {
     httpOnly: true,
-    secure: config.cookieSecure, // true in production (HTTPS)
+    secure: config.cookieSecure, // true in prod (HTTPS)
     sameSite: "lax",
-    path: "/api/auth/refresh",
+    path: "/api/auth", // <- changed from "/api/auth/refresh"
     expires: expiresAt,
   });
 };
@@ -16,7 +17,7 @@ const clearRefreshCookie = (res) => {
     httpOnly: true,
     secure: config.cookieSecure,
     sameSite: "lax",
-    path: "/api/auth/refresh",
+    path: "/api/auth", // <- must match setRefreshCookie
   });
 };
 
@@ -103,11 +104,12 @@ const deleteUser = async (req, res, next) => {
 
 const logout = async (req, res, next) => {
   try {
-    // Try cookie first, then fallback to body.token
-    const refreshToken =
-      req.cookies && req.cookies.refreshToken
-        ? req.cookies.refreshToken
-        : req.body.refreshToken;
+    // safer access with optional chaining
+    const refreshToken = req.cookies?.refreshToken ?? req.body?.refreshToken;
+
+    if (!refreshToken) {
+      return res.status(400).json({ message: "No refresh token provided" });
+    }
 
     // Revoke in DB (if present)
     await authService.logoutUser(refreshToken);
@@ -115,7 +117,6 @@ const logout = async (req, res, next) => {
     // Clear cookie on response (so client loses the cookie)
     clearRefreshCookie(res);
 
-    // Optionally instruct client to remove access token from client-side storage
     res.json({ message: "Logged out successfully" });
   } catch (err) {
     next(err);
@@ -129,5 +130,5 @@ module.exports = {
   getUser,
   updateUser,
   deleteUser,
-  logout
+  logout,
 };
