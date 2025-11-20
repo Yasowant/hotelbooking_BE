@@ -11,12 +11,22 @@ const hotelImageRoutes = require("./routes/hotelImageRoutes");
 
 const app = express();
 
-// ✅ Enable CORS for client
+// 🔥 Allowed origins from config (array)
+const allowedOrigins = config.clientUrls;
+
+// ✅ Dynamic CORS
 app.use(
   cors({
-    origin: config.clientUrl,
-    methods: ["GET", "POST", "PUT", "DELETE"],
-    credentials: true, // allow cookies
+    origin: function (origin, callback) {
+      if (!origin) return callback(null, true);
+      if (allowedOrigins.includes(origin)) return callback(null, true);
+      return callback(
+        new Error("CORS blocked: " + origin + " is not allowed"),
+        false
+      );
+    },
+    credentials: true,
+    methods: ["GET", "POST", "PUT", "DELETE", "OPTIONS"],
   })
 );
 
@@ -36,6 +46,7 @@ const port = config.port;
 
 app.listen(port, async () => {
   console.log(`🚀 Server running on port ${port}`);
+  console.log("Allowed Origins:", allowedOrigins);
 
   try {
     await db.query("SELECT NOW()");
