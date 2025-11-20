@@ -1,6 +1,10 @@
-// src/config/index.js
 const dotenv = require("dotenv");
 dotenv.config();
+
+const clientUrls = (process.env.CLIENT_URL || "")
+  .split(",")
+  .map((s) => s.trim())
+  .filter(Boolean);
 
 module.exports = {
   port: process.env.PORT || 4000,
@@ -12,6 +16,6 @@ module.exports = {
     refreshExpiresIn: process.env.REFRESH_TOKEN_EXPIRES_IN || "30d",
   },
   bcryptRounds: parseInt(process.env.BCRYPT_SALT_ROUNDS || "12", 10),
-  clientUrl: process.env.CLIENT_URL,
+  clientUrls,
   cookieSecure: process.env.COOKIE_SECURE === "true",
 };
